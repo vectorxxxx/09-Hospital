@@ -64,12 +64,12 @@ public class RedisConfig
      */
     @Bean
     public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+        final RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
+        final ObjectMapper om = new ObjectMapper();
+        final Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        final StringRedisSerializer redisSerializer = new StringRedisSerializer();
 
         //解决查询缓存转换异常的问题
-        ObjectMapper om = new ObjectMapper();
         // 指定要序列化的域，field,get和set,以及修饰符范围，ANY是都有包括private和public
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         // 指定序列化输入的类型，类必须是非final修饰的，final修饰的类，比如String,Integer等会跑出异常
@@ -77,12 +77,13 @@ public class RedisConfig
         jackson2JsonRedisSerializer.setObjectMapper(om);
 
         //序列号key value
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(redisSerializer);
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(redisSerializer);
         redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
-
         redisTemplate.afterPropertiesSet();
+
         return redisTemplate;
     }
 
@@ -94,11 +95,11 @@ public class RedisConfig
      */
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory factory) {
-        RedisSerializer<String> redisSerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+        final ObjectMapper om = new ObjectMapper();
+        final Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        final RedisSerializer<String> redisSerializer = new StringRedisSerializer();
 
         //解决查询缓存转换异常的问题
-        ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);

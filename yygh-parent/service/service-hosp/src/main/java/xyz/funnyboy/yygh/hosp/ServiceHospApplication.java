@@ -1,4 +1,4 @@
-package xyz.funnyboy.yygh;
+package xyz.funnyboy.yygh.hosp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @version V1.0
  * @date 2024-01-06 15:04:51
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "xyz.funnyboy")
 public class ServiceHospApplication
 {
     public static void main(String[] args) {

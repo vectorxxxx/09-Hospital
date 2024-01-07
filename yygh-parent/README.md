@@ -9,3 +9,9 @@ Logback 和 log4j 都是日志记录框架，用于在 Java 应用程序中记�
  5. 依赖项不同：Logback 是一个独立的库，不需要依赖其他库。而 log4j 需要依赖 Apache Commons Logging 库。
 
 总的来说，Logback 比 log4j 功能更强大，性能更好，推荐使用。但是，如果你已经在项目中使用了 log4j，那么可以考虑逐步迁移到 Logback，以获得更好的性能和功能。
+
+
+
+## 2、CMN 是什么？
+
+Cloud Managed Network，云网管

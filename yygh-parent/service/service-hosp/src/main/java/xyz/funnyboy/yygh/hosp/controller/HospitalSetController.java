@@ -27,6 +27,7 @@ import java.util.Random;
 @Api(tags = "医院设置管理")
 @RestController
 @RequestMapping("/admin/hosp/hospitalSet")
+@CrossOrigin
 public class HospitalSetController
 {
 
@@ -72,9 +73,9 @@ public class HospitalSetController
     /**
      * 3 条件查询带分页
      *
-     * @param current            当前
-     * @param limit              限制
-     * @param hospitalSetQueryVo 医院设置查询 VO
+     * @param current   当前
+     * @param limit     限制
+     * @param searchObj 医院设置查询 VO
      * @return {@link Result}
      */
     @ApiOperation(value = "3 条件查询带分页")
@@ -92,17 +93,17 @@ public class HospitalSetController
             @PathVariable
                     long limit,
 
-            @ApiParam(name = "hospitalSetQueryVo",
+            @ApiParam(name = "searchObj",
                       value = "查询对象",
                       required = false)
             @RequestBody(required = false)
-                    HospitalSetQueryVo hospitalSetQueryVo) {
+                    HospitalSetQueryVo searchObj) {
         //创建page对象，传递当前页，每页记录数
         Page<HospitalSet> page = new Page<>(current, limit);
         //构建条件
         QueryWrapper<HospitalSet> wrapper = new QueryWrapper<>();
-        String hosname = hospitalSetQueryVo.getHosname();//医院名称
-        String hoscode = hospitalSetQueryVo.getHoscode();//医院编号
+        String hosname = searchObj.getHosname();//医院名称
+        String hoscode = searchObj.getHoscode();//医院编号
         wrapper.like(!StringUtils.isEmpty(hosname), "hosname", hosname);
         wrapper.eq(!StringUtils.isEmpty(hoscode), "hoscode", hoscode);
         //调用方法实现分页查询
