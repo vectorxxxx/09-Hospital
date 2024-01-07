@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.funnyboy.yygh.common.utils.HttpUtil;
 import xyz.funnyboy.yygh.common.utils.MD5;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,10 +79,7 @@ public class HttpRequestHelper
     public static boolean isSignEquals(Map<String, Object> paramMap, String signKey) {
         String sign = (String) paramMap.get("sign");
         String md5Str = getSign(paramMap, signKey);
-        if (!sign.equals(md5Str)) {
-            return false;
-        }
-        return true;
+        return sign.equals(md5Str);
     }
 
     /**
@@ -115,7 +113,7 @@ public class HttpRequestHelper
             log.info(String.format("--> 发送请求：post data %1s", postdata));
             byte[] reqData = postdata
                     .toString()
-                    .getBytes("utf-8");
+                    .getBytes(StandardCharsets.UTF_8);
             byte[] respdata = HttpUtil.doPost(url, reqData);
             result = new String(respdata);
             log.info(String.format("--> 应答结果：result data %1s", result));

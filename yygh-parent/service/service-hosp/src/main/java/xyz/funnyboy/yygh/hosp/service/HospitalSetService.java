@@ -13,5 +13,11 @@ import xyz.funnyboy.yygh.model.hosp.HospitalSet;
  */
 public interface HospitalSetService extends IService<HospitalSet>
 {
-
+    /**
+     * 获取签名密钥
+     *
+     * @param hoscode 医院编号
+     * @return {@link String}
+     */
+    String getSignKey(String hoscode);
 }

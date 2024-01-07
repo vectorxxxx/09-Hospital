@@ -43,7 +43,9 @@ public class BookingRule
     private List<String> rule;
 
     /**
-     * @param rule
+     * Map转换为Hospital对象时，预约规则bookingRule为一个对象属性，rule为一个数组属性，因此在转换时我们要重新对应的set方法，不然转换不会成功
+     *
+     * @param rule 规则
      */
     public void setRule(String rule) {
         if (!StringUtils.isEmpty(rule)) {

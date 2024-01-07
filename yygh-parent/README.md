@@ -15,3 +15,97 @@ Logback 和 log4j 都是日志记录框架，用于在 Java 应用程序中记�
 ## 2、CMN 是什么？
 
 Cloud Managed Network，云网管
+
+
+
+## 3、Docker 拉取 MongoDB
+
+### 3.1、修改镜像源
+
+```shell
+vim /etc/docker/daemon.json
+```
+
+`/etc/docker/daemon.json`
+
+```json
+{
+  "registry-mirrors": [
+    "https://6kx4zyno.mirror.aliyuncs.com",
+    "https://docker.mirrors.ustc.edu.cn/",
+    "https://hub-mirror.c.163.com",
+    "https://registry.docker-cn.com"
+  ]
+}
+```
+
+重启 Docker
+
+```shell
+# systemd 会自动重新加载配置文件，并将新的服务添加到 systemd 的服务管理列表中
+systemctl daemon-reload
+
+# 重启 Docker
+systemctl restart docker
+```
+
+### 3.2、安装运行 MongoDB
+
+```shell
+# 拉取 MongoDB 镜像
+docker pull mongo:latest
+
+# 创建和启动容器
+# `-d` 表示以分离模式运行容器
+# `--restart=always` 表示当容器退出时自动重启
+# `-p 27017:27017` 表示将容器的 27017 端口映射到宿主机的 27017 端口
+# `--name mymongo` 表示为容器设置一个名称
+# `-v /data/db:/data/db` 表示将宿主机的 /data/db 目录映射到容器的 /data/db 目录
+# 启动一个名为 `mymongo` 的 MongoDB 容器，将容器的 27017 端口映射到宿主机的 27017 端口，将宿主机的 /data/db 目录映射到容器的 /data/db 目录，以分离模式运行容器，并在容器退出时自动重启。
+docker run -d --restart=always -p 27017:27017 --name mymongo -v /data/db:/data/db mongo
+
+# 查看容器运行状态
+docker ps
+
+# 进入容器
+# `-it` 选项表示在执行命令时打开一个交互式终端
+# `mymongo` 是容器名称
+# `/bin/bash` 是将要执行的命令。
+# 当执行 `docker exec -it mymongo /bin/bash` 命令时，它会进入容器中的 Bash  Shell，可以与容器内的系统进行交互。在容器内执行的命令都会在 Bash Shell 中执行，例如，可以输入 `ls` 命令来查看容器内的文件。
+# 需要注意的是，在容器内执行命令时，可以使用 `/` 符号来访问宿主机的文件系统，例如，可以使用 `/data/db` 符号来访问宿主机的 /data/db 目录。
+docker exec -it mymongo /bin/bash
+
+# 使用MongoDB客户端进行操作 
+mongo 
+
+# 查询所有的数据库 
+show dbs
+```
+
+### 3.3、虚拟机联通主机
+
+```shell
+# 修改入站规则
+# `/sbin/iptables`：iptables 是一个 Linux 系统上的防火墙工具，用于控制进出系统的网络流量。
+# `-I INPUT`：-I 选项表示在 INPUT 链表的末尾添加一条规则。
+# `-p tcp`：-p 选项表示该规则仅适用于 TCP 协议。
+# `--dport 27017`：--dport 选项表示该规则仅允许从指定端口进入的流量。在这个例子中，允许从端口 27017 进入的流量。
+# `-j ACCEPT`：-j 选项表示当匹配到该规则时，将允许该流量进入系统。在这个例子中，允许从端口 27017 进入的流量。
+# 该命令的作用是在 Linux 系统的防火墙中添加一条规则，允许从端口 27017 进入的 TCP 流量进入系统。
+/sbin/iptables -I INPUT -p tcp --dport 27017 -j ACCEPT
+
+# 保存并重启
+service iptables save
+service iptables restart
+
+# 查看端口占用情况
+yum install -y lsof
+lsof -i:27017
+# 或者
+# -t (tcp) 仅显示tcp相关选项
+# -u (udp)仅显示udp相关选项
+# -n 拒绝显示别名，能显示数字的全部转化为数字
+# -l 仅列出在Listen(监听)的服务状态
+# -p 显示建立相关链接的程序名
+netstat -tunpl | grep 27017
+```

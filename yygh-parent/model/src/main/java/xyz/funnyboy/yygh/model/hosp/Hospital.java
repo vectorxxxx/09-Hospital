@@ -60,10 +60,14 @@ public class Hospital extends BaseMongoEntity
     @ApiModelProperty(value = "状态 0：未上线 1：已上线")
     private Integer status;
 
-    //预约规则
     @ApiModelProperty(value = "预约规则")
     private BookingRule bookingRule;
 
+    /**
+     * Map转换为Hospital对象时，预约规则bookingRule为一个对象属性，rule为一个数组属性，因此在转换时我们要重新对应的set方法，不然转换不会成功
+     *
+     * @param bookingRule 预订规则
+     */
     public void setBookingRule(String bookingRule) {
         this.bookingRule = JSONObject.parseObject(bookingRule, BookingRule.class);
     }
