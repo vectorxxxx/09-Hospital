@@ -70,7 +70,7 @@ import dictApi from '@/api/dict'
 export default {
   data() {
     return {
-      id: 0,
+      id: 1,
       baseURL: process.env.BASE_API,
       list: [],
       dialogImportVisible: false
