@@ -7,6 +7,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.funnyboy.yygh.cmn.listener.DictListener;
 import xyz.funnyboy.yygh.cmn.mapper.DictMapper;
@@ -101,6 +102,65 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 获取字典名称
+     *
+     * @param dictCode 字典code
+     * @param value    字典value
+     * @return {@link String}
+     */
+    @Override
+    public String getDictName(String dictCode, String value) {
+        // 如果value能唯一定位数据字典，parentDictCode可以传空，例如：省市区的value值能够唯一确定
+        if (StringUtils.isEmpty(dictCode)) {
+            final Dict dict = baseMapper.selectOne(new LambdaQueryWrapper<Dict>().eq(Dict::getValue, value));
+            if (dict != null) {
+                return dict.getName();
+            }
+        }
+
+        // 父节点
+        final Dict dict = this.getDictByDictCode(dictCode);
+        if (dict == null) {
+            return "";
+        }
+
+        // 子节点
+        final Dict finalDict = baseMapper.selectOne(new LambdaQueryWrapper<Dict>()
+                .eq(Dict::getParentId, dict.getId())
+                .eq(Dict::getValue, value));
+        if (finalDict == null) {
+            return "";
+        }
+
+        return finalDict.getName();
+    }
+
+    /**
+     * 按字典代码查找
+     *
+     * @param dictCode 字典代码
+     * @return {@link List}<{@link Dict}>
+     */
+    @Override
+    public List<Dict> findByDictCode(String dictCode) {
+        final Dict dict = this.getDictByDictCode(dictCode);
+        if (dict == null) {
+            return null;
+        }
+        return this.findChildData(dict.getId());
+    }
+
+    /**
+     * 通过 字典code 代码获取 dict
+     *
+     * @param dictCode 字典code
+     * @return {@link Dict}
+     */
+    private Dict getDictByDictCode(String dictCode) {
+        return baseMapper.selectOne(new LambdaQueryWrapper<Dict>().eq(Dict::getDictCode, dictCode));
     }
 
     /**

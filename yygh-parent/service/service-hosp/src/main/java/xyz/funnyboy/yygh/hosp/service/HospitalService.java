@@ -1,6 +1,8 @@
 package xyz.funnyboy.yygh.hosp.service;
 
+import org.springframework.data.domain.Page;
 import xyz.funnyboy.yygh.model.hosp.Hospital;
+import xyz.funnyboy.yygh.vo.hosp.HospitalQueryVo;
 
 import java.util.Map;
 
@@ -27,4 +29,30 @@ public interface HospitalService
      * @return {@link Hospital}
      */
     Hospital getByHoscode(String hoscode);
+
+    /**
+     * 分页查询医院
+     *
+     * @param page            页数
+     * @param limit           页面大小
+     * @param hospitalQueryVo 医院查询VO
+     * @return {@link Page}<{@link Hospital}>
+     */
+    Page<Hospital> selectHospPage(Integer page, Integer limit, HospitalQueryVo hospitalQueryVo);
+
+    /**
+     * 更新上线状态
+     *
+     * @param id     编号
+     * @param status 地位
+     */
+    void updateStatus(String id, Integer status);
+
+    /**
+     * 获取医院详情
+     *
+     * @param id 编号
+     * @return {@link Map}<{@link String}, {@link Object}>
+     */
+    Map<String, Object> getHospById(String id);
 }
