@@ -52,15 +52,14 @@ public class HospitalServiceImpl implements HospitalService
         if (hospitalByHoscode != null) {
             hospitalByHoscode.setStatus(hospital.getStatus());
             hospitalByHoscode.setCreateTime(hospital.getCreateTime());
-            hospital.setUpdateTime(new Date());
-            hospital.setIsDeleted(0);
-            hospitalRepository.save(hospital);
+            hospitalByHoscode.setUpdateTime(new Date());
+            hospitalByHoscode.setIsDeleted(0);
+            hospitalRepository.save(hospitalByHoscode);
         }
         else {
-            hospitalByHoscode = new Hospital();
             // 0：未上线 1：已上线
-            hospitalByHoscode.setStatus(0);
-            hospitalByHoscode.setCreateTime(new Date());
+            hospital.setStatus(0);
+            hospital.setCreateTime(new Date());
             hospital.setUpdateTime(new Date());
             hospital.setIsDeleted(0);
             hospitalRepository.insert(hospital);
@@ -90,7 +89,7 @@ public class HospitalServiceImpl implements HospitalService
     @Override
     public Page<Hospital> selectHospPage(Integer page, Integer limit, HospitalQueryVo hospitalQueryVo) {
         // 分页条件
-        final PageRequest pageRequest = PageRequest.of(page, limit);
+        final PageRequest pageRequest = PageRequest.of(page - 1, limit);
 
         // 查询条件
         final Hospital hospital = new Hospital();
@@ -141,12 +140,15 @@ public class HospitalServiceImpl implements HospitalService
     public Map<String, Object> getHospById(String id) {
         Map<String, Object> result = new HashMap<>();
         // 医院详情
-        final Hospital hospital = hospitalRepository
+        Hospital hospital = hospitalRepository
                 .findById(id)
                 .orElse(null);
         if (hospital == null) {
             return result;
         }
+
+        // 设置医院等级名称和地址等信息
+        hospital = setHospitalHosType(hospital);
 
         // 组装数据
         result.put("hospital", hospital);

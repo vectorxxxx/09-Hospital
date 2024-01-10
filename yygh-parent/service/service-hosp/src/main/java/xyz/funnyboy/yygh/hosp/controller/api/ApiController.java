@@ -2,6 +2,7 @@ package xyz.funnyboy.yygh.hosp.controller.api;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.util.StringUtils;
@@ -35,6 +36,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/hosp")
 @CrossOrigin
+@Slf4j
 public class ApiController
 {
     @Autowired
@@ -63,7 +65,8 @@ public class ApiController
 
         // 验签
         if (!isSignEquals(paramMap)) {
-            throw new YyghException(ResultCodeEnum.SIGN_ERROR);
+            log.error(ResultCodeEnum.SIGN_ERROR.getMessage());
+            // throw new YyghException(ResultCodeEnum.SIGN_ERROR);
         }
 
         // 传输过程中“+”转换为了“ ”，因此我们要转换回来
@@ -82,14 +85,20 @@ public class ApiController
      * @return boolean
      */
     private boolean isSignEquals(Map<String, Object> paramMap) {
+        // 传递过来的 sign
+        String sign = (String) paramMap.get("sign");
+
+        // 查询数据库的 signKey
         final String hoscode = (String) paramMap.get("hoscode");
         final String signKey = hospitalSetService.getSignKey(hoscode);
-        final String encrypt = MD5.encrypt(signKey);
-        return HttpRequestHelper.isSignEquals(paramMap, encrypt);
+        final String encryptSignKey = MD5.encrypt(signKey);
+
+        // 与传递过来的 sign 进行对比
+        return sign.equals(encryptSignKey);
     }
 
     @ApiOperation(value = "查询医院")
-    @GetMapping("hospital/show")
+    @PostMapping("hospital/show")
     public Result getHospital(HttpServletRequest request) {
         // 获取传递过来的请求参数
         final Map<String, Object> paramMap = HttpRequestHelper.switchMap(request.getParameterMap());
@@ -102,7 +111,8 @@ public class ApiController
 
         // 验签
         if (!isSignEquals(paramMap)) {
-            throw new YyghException(ResultCodeEnum.SIGN_ERROR);
+            log.error(ResultCodeEnum.SIGN_ERROR.getMessage());
+            // throw new YyghException(ResultCodeEnum.SIGN_ERROR);
         }
 
         final Hospital hospital = hospitalService.getByHoscode(hoscode);
@@ -123,7 +133,8 @@ public class ApiController
 
         // 验签
         if (!isSignEquals(paramMap)) {
-            throw new YyghException(ResultCodeEnum.SIGN_ERROR);
+            log.error(ResultCodeEnum.SIGN_ERROR.getMessage());
+            // throw new YyghException(ResultCodeEnum.SIGN_ERROR);
         }
 
         departmentService.save(paramMap);
@@ -131,13 +142,14 @@ public class ApiController
     }
 
     @ApiOperation(value = "查询科室")
-    @GetMapping("department/list")
+    @PostMapping("department/list")
     public Result getDepartment(HttpServletRequest request) {
         final Map<String, Object> paramMap = HttpRequestHelper.switchMap(request.getParameterMap());
 
         // 验签
         if (!isSignEquals(paramMap)) {
-            throw new YyghException(ResultCodeEnum.SIGN_ERROR);
+            log.error(ResultCodeEnum.SIGN_ERROR.getMessage());
+            // throw new YyghException(ResultCodeEnum.SIGN_ERROR);
         }
 
         // 查询条件
@@ -176,7 +188,8 @@ public class ApiController
 
         // 验签
         if (!isSignEquals(paramMap)) {
-            throw new YyghException(ResultCodeEnum.SIGN_ERROR);
+            log.error(ResultCodeEnum.SIGN_ERROR.getMessage());
+            // throw new YyghException(ResultCodeEnum.SIGN_ERROR);
         }
 
         // 删除
@@ -198,7 +211,8 @@ public class ApiController
 
         // 验签
         if (!isSignEquals(paramMap)) {
-            throw new YyghException(ResultCodeEnum.SIGN_ERROR);
+            log.error(ResultCodeEnum.SIGN_ERROR.getMessage());
+            // throw new YyghException(ResultCodeEnum.SIGN_ERROR);
         }
 
         scheduleService.save(paramMap);
@@ -206,14 +220,15 @@ public class ApiController
     }
 
     @ApiOperation(value = "获取排班")
-    @GetMapping("schedule/list")
+    @PostMapping("schedule/list")
     public Result list(HttpServletRequest request) {
         // 请求参数
         final Map<String, Object> paramMap = HttpRequestHelper.switchMap(request.getParameterMap());
 
         // 验签
         if (!isSignEquals(paramMap)) {
-            throw new YyghException(ResultCodeEnum.SIGN_ERROR);
+            log.error(ResultCodeEnum.SIGN_ERROR.getMessage());
+            // throw new YyghException(ResultCodeEnum.SIGN_ERROR);
         }
 
         // 分页参数
@@ -248,7 +263,8 @@ public class ApiController
 
         // 验签
         if (!isSignEquals(paramMap)) {
-            throw new YyghException(ResultCodeEnum.SIGN_ERROR);
+            log.error(ResultCodeEnum.SIGN_ERROR.getMessage());
+            // throw new YyghException(ResultCodeEnum.SIGN_ERROR);
         }
 
         scheduleService.remove(hoscode, hosScheduleId);

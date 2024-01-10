@@ -21,7 +21,7 @@
         </tr>
         <tr>
           <th>坐车路线</th>
-          <td colspan="3">{{ hospital.rout }}</td>
+          <td colspan="3">{{ hospital.route }}</td>
         </tr>
         <tr>
           <th>医院简介</th>
@@ -50,7 +50,7 @@
           <td colspan="3">
             <ol>
               <li
-                v-for="item in bookingRule.ruleList"
+                v-for="item in bookingRule.rule"
                 :key="item">
                 {{ item }}
               </li>

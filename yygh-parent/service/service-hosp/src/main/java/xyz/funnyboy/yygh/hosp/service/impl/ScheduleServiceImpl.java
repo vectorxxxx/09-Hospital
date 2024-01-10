@@ -38,11 +38,10 @@ public class ScheduleServiceImpl implements ScheduleService
             scheduleRepository.save(schedule);
         }
         else {
-            scheduleByHoscodeAndHosScheduleId = new Schedule();
-            scheduleByHoscodeAndHosScheduleId.setCreateTime(new Date());
-            scheduleByHoscodeAndHosScheduleId.setUpdateTime(new Date());
-            scheduleByHoscodeAndHosScheduleId.setStatus(1);
-            scheduleByHoscodeAndHosScheduleId.setIsDeleted(0);
+            schedule.setCreateTime(new Date());
+            schedule.setUpdateTime(new Date());
+            schedule.setStatus(1);
+            schedule.setIsDeleted(0);
             scheduleRepository.save(schedule);
         }
     }
@@ -59,7 +58,7 @@ public class ScheduleServiceImpl implements ScheduleService
     public Page<Schedule> findPageSchedule(int page, int limit, ScheduleQueryVo scheduleQueryVo) {
         // 分页参数
         final Sort sort = Sort.by(Sort.Direction.DESC, "createTime");
-        final PageRequest pageRequest = PageRequest.of(page, limit, sort);
+        final PageRequest pageRequest = PageRequest.of(page - 1, limit, sort);
 
         // 查询条件
         Schedule schedule = new Schedule();

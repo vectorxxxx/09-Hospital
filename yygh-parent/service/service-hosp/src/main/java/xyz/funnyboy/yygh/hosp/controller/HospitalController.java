@@ -63,6 +63,7 @@ public class HospitalController
             @ApiParam(name = "status",
                       value = "状态",
                       required = true)
+            @PathVariable
                     Integer status) {
         hospitalService.updateStatus(id, status);
         return Result.ok();
