@@ -35,7 +35,7 @@ import java.util.Map;
 @Api(tags = "医院管理API接口")
 @RestController
 @RequestMapping("/api/hosp")
-@CrossOrigin
+// @CrossOrigin
 @Slf4j
 public class ApiController
 {
