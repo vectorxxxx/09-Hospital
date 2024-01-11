@@ -3,7 +3,9 @@ package xyz.funnyboy.yygh.hosp.service;
 import org.springframework.data.domain.Page;
 import xyz.funnyboy.yygh.model.hosp.Department;
 import xyz.funnyboy.yygh.vo.hosp.DepartmentQueryVo;
+import xyz.funnyboy.yygh.vo.hosp.DepartmentVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,4 +41,21 @@ public interface DepartmentService
      * @param depcode depcode
      */
     void remove(String hoscode, String depcode);
+
+    /**
+     * 根据医院编号，查询医院所有科室列表
+     *
+     * @param hoscode 医院编号
+     * @return {@link List}<{@link DepartmentVo}>
+     */
+    List<DepartmentVo> findDeptTree(String hoscode);
+
+    /**
+     * 获取科室名称
+     *
+     * @param hoscode 医院编号
+     * @param depcode 科室编号
+     * @return {@link String}
+     */
+    String getDepName(String hoscode, String depcode);
 }

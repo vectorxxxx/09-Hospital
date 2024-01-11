@@ -55,4 +55,12 @@ public interface HospitalService
      * @return {@link Map}<{@link String}, {@link Object}>
      */
     Map<String, Object> getHospById(String id);
+
+    /**
+     * 获取医院名称
+     *
+     * @param hoscode 医院编号
+     * @return {@link String}
+     */
+    String getHospName(String hoscode);
 }

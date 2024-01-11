@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import xyz.funnyboy.yygh.model.hosp.Schedule;
 import xyz.funnyboy.yygh.vo.hosp.ScheduleQueryVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,4 +40,25 @@ public interface ScheduleService
      * @param hosScheduleId 排班编号
      */
     void remove(String hoscode, String hosScheduleId);
+
+    /**
+     * 获取规则计划
+     *
+     * @param page    页码
+     * @param limit   每页记录
+     * @param hoscode 医院编号
+     * @param depcode 科室编号
+     * @return {@link Map}<{@link String}, {@link Object}>
+     */
+    Map<String, Object> getRuleSchedule(long page, long limit, String hoscode, String depcode);
+
+    /**
+     * 获取排班详情列表
+     *
+     * @param hoscode  医院编号
+     * @param depcode  科室编号
+     * @param workDate 工作日期
+     * @return {@link List}<{@link Schedule}>
+     */
+    List<Schedule> getDetailSchedule(String hoscode, String depcode, String workDate);
 }

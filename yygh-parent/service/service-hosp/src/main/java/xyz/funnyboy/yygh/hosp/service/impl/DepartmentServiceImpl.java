@@ -9,9 +9,13 @@ import xyz.funnyboy.yygh.hosp.repository.DepartmentRepository;
 import xyz.funnyboy.yygh.hosp.service.DepartmentService;
 import xyz.funnyboy.yygh.model.hosp.Department;
 import xyz.funnyboy.yygh.vo.hosp.DepartmentQueryVo;
+import xyz.funnyboy.yygh.vo.hosp.DepartmentVo;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * DepartmentServiceImpl
@@ -45,11 +49,10 @@ public class DepartmentServiceImpl implements DepartmentService
             departmentRepository.save(departmentByHoscodeAndDepcode);
         }
         else {
-            departmentByHoscodeAndDepcode = new Department();
-            departmentByHoscodeAndDepcode.setCreateTime(new Date());
-            departmentByHoscodeAndDepcode.setUpdateTime(new Date());
-            departmentByHoscodeAndDepcode.setIsDeleted(0);
-            departmentRepository.insert(departmentByHoscodeAndDepcode);
+            department.setCreateTime(new Date());
+            department.setUpdateTime(new Date());
+            department.setIsDeleted(0);
+            departmentRepository.save(department);
         }
     }
 
@@ -93,5 +96,70 @@ public class DepartmentServiceImpl implements DepartmentService
         if (department != null) {
             departmentRepository.deleteById(department.getId());
         }
+    }
+
+    /**
+     * 根据医院编号，查询医院所有科室列表
+     *
+     * @param hoscode 医院编号
+     * @return {@link List}<{@link DepartmentVo}>
+     */
+    @Override
+    public List<DepartmentVo> findDeptTree(String hoscode) {
+        List<DepartmentVo> result = new ArrayList<>();
+
+        // 查询医院所有科室信息
+        Department departmentQuery = new Department();
+        departmentQuery.setHoscode(hoscode);
+        final Example<Department> example = Example.of(departmentQuery);
+        final List<Department> departmentList = departmentRepository.findAll(example);
+
+        // 根据大科室编号 bigcode 分组，获取每个大科室的下级子科室
+        final Map<String, List<Department>> departmentListMap = departmentList
+                .stream()
+                .collect(Collectors.groupingBy(Department::getBigcode));
+
+        // 封装查询结果
+        for (Map.Entry<String, List<Department>> entry : departmentListMap.entrySet()) {
+            final String bigCode = entry.getKey();
+            final List<Department> children = entry.getValue();
+
+            // 封装大科室
+            DepartmentVo departmentVo = new DepartmentVo();
+            departmentVo.setDepcode(bigCode);
+            departmentVo.setDepname(children
+                    .get(0)
+                    .getBigname());
+
+            // 封装小科室
+            List<DepartmentVo> childrenList = new ArrayList<>();
+            for (Department child : children) {
+                DepartmentVo childVo = new DepartmentVo();
+                childVo.setDepcode(child.getDepcode());
+                childVo.setDepname(child.getDepname());
+                childrenList.add(childVo);
+            }
+            departmentVo.setChildren(childrenList);
+
+            result.add(departmentVo);
+        }
+
+        return result;
+    }
+
+    /**
+     * 获取科室名称
+     *
+     * @param hoscode 医院编号
+     * @param depcode 科室编号
+     * @return {@link String}
+     */
+    @Override
+    public String getDepName(String hoscode, String depcode) {
+        final Department department = departmentRepository.getDepartmentByHoscodeAndDepcode(hoscode, depcode);
+        if (department != null) {
+            return department.getDepname();
+        }
+        return "";
     }
 }
