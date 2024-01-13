@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import xyz.funnyboy.yygh.model.hosp.Hospital;
 import xyz.funnyboy.yygh.vo.hosp.HospitalQueryVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,4 +64,12 @@ public interface HospitalService
      * @return {@link String}
      */
     String getHospName(String hoscode);
+
+    /**
+     * 按 医院名称 查找
+     *
+     * @param hosname 医院名称
+     * @return {@link List}<{@link Hospital}>
+     */
+    List<Hospital> findByHosname(String hosname);
 }

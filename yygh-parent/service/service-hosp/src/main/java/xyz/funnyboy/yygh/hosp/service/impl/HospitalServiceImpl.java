@@ -16,6 +16,7 @@ import xyz.funnyboy.yygh.vo.hosp.HospitalQueryVo;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -171,6 +172,17 @@ public class HospitalServiceImpl implements HospitalService
             return hospital.getHosname();
         }
         return "";
+    }
+
+    /**
+     * 按 医院名称 查找
+     *
+     * @param hosname 医院名称
+     * @return {@link List}<{@link Hospital}>
+     */
+    @Override
+    public List<Hospital> findByHosname(String hosname) {
+        return hospitalRepository.findHospitalsByHosnameLike(hosname);
     }
 
     /**
