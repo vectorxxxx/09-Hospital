@@ -120,6 +120,7 @@
 import '~/assets/css/hospital_personal.css'
 import '~/assets/css/hospital.css'
 
+import cookie from 'js-cookie'
 import hosApi from '@/api/hosp/hospital'
 export default {
   data() {
@@ -159,6 +160,12 @@ export default {
     },
     // 排班
     schedule(depcode) {
+      // 登录判断
+      if (!cookie.get('token')) {
+        // eslint-disable-next-line no-undef
+        loginEvent.$emit('loginDialogEvent')
+        return
+      }
       window.location.href = '/hospital/schedule?hoscode=' + this.hoscode + '&depcode=' + depcode
     }
   }

@@ -109,3 +109,77 @@ lsof -i:27017
 # -p 显示建立相关链接的程序名
 netstat -tunpl | grep 27017
 ```
+
+
+
+## 4、InetAddress 是什么？
+
+`InetAddress` 是 Java 中的一个类，表示 IP 地址。它是 `java.net` 包下的一个类，用于处理网络通信中的 IP 地址。在 Java 中，IP 地址通常表示为四个十进制数，如 `192.168.1.1`。`InetAddress` 类提供了对 IP 地址的各种操作，如获取地址信息、解析地址等。
+
+ `InetAddress` 类的主要构造方法如下：
+
+ 1. `InetAddress(String ipaddress)`：通过 IP 地址字符串构造 `InetAddress` 对象。
+ 2. `InetAddress(byte[] address)`：通过 IP 地址字节数组构造 `InetAddress` 对象。
+ 3. `InetAddress(InetAddress addr)`：通过另一个 `InetAddress` 对象构造 `InetAddress` 对象。
+
+ `InetAddress` 类的主要方法如下：
+
+ 1. `getHostAddress()`：获取 IP 地址字符串。
+ 2. `getHostName()`：获取主机名。
+ 3. `getInetAddress()`：获取 IP 地址字节数组。
+ 4. `getHostAddress()`：获取 IP 地址字符串。
+ 5. `getHostName()`：获取主机名。
+ 6. `getInetAddress()`：获取 IP 地址字节数组。
+ 7. `getCanonicalHostName()`：获取规范的主机名。
+ 8. `getLocalHost()`：获取本地主机地址。
+ 9. `getAllByName(String host)`：根据主机名获取 `InetAddress` 对象列表。
+ 10. `getAllByNameInetAddress(InetAddress addr)`：根据 `InetAddress` 对象获取 `InetAddress` 对象列表。
+
+ 以下是一个简单的示例，展示了如何创建 `InetAddress` 对象并获取其信息：
+
+ ```java
+ import java.net.InetAddress;
+ import java.net.UnknownHostException;
+ 
+ public class InetAddressExample {
+     public static void main(String[] args) {
+         try {
+             // 创建 InetAddress 对象
+             InetAddress inetAddress = InetAddress.getByName("www.baidu.com");
+ 
+             // 获取 IP 地址字符串
+             String ipAddress = inetAddress.getHostAddress();
+             System.out.println("IP Address: " + ipAddress);
+ 
+             // 获取主机名
+             String hostName = inetAddress.getHostName();
+             System.out.println("Host Name: " + hostName);
+ 
+             // 获取 IP 地址字节数组
+             byte[] address = inetAddress.getInetAddress();
+             System.out.println("IP Address Byte Array: " + address);
+ 
+             // 获取规范的主机名
+             String canonicalHostName = inetAddress.getCanonicalHostName();
+             System.out.println("Canonical Host Name: " + canonicalHostName);
+ 
+             // 获取本地主机地址
+             InetAddress localHost = InetAddress.getLocalHost();
+             System.out.println("Local Host Address: " + localHost.getHostAddress());
+ 
+         } catch (UnknownHostException e) {
+             e.printStackTrace();
+         }
+     }
+ }
+ ```
+
+ 这个示例将输出：
+
+ ```
+ IP Address: 114.114.114.114
+ Host Name: www.baidu.com
+ IP Address Byte Array: [114, 114, 114, 114]
+ Canonical Host Name: www.baidu.com
+ Local Host Address: 127.0.0.1
+ ```
