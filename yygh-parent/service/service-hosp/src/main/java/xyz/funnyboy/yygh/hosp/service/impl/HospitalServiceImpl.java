@@ -186,6 +186,26 @@ public class HospitalServiceImpl implements HospitalService
     }
 
     /**
+     * 根据医院编号获取医院挂号预约详情
+     *
+     * @param hoscode 医院编号
+     * @return {@link Map}<{@link String}, {@link Object}>
+     */
+    @Override
+    public Map<String, Object> item(String hoscode) {
+        // 查询医院详情
+        Hospital hospital = hospitalRepository.getHospitalByHoscode(hoscode);
+        // 设置医院等级、省、市、地区
+        hospital = setHospitalHosType(hospital);
+
+        // 封装医院挂号预约详情
+        Map<String, Object> result = new HashMap<>();
+        result.put("hospital", hospital);
+        result.put("bookingRule", hospital.getBookingRule());
+        return result;
+    }
+
+    /**
      * 设置医院等级
      *
      * @param hospital 医院

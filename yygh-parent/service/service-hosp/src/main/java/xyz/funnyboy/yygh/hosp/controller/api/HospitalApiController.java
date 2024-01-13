@@ -10,11 +10,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import xyz.funnyboy.yygh.common.result.Result;
+import xyz.funnyboy.yygh.hosp.service.DepartmentService;
 import xyz.funnyboy.yygh.hosp.service.HospitalService;
 import xyz.funnyboy.yygh.model.hosp.Hospital;
+import xyz.funnyboy.yygh.vo.hosp.DepartmentVo;
 import xyz.funnyboy.yygh.vo.hosp.HospitalQueryVo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 医院管理接口
@@ -30,6 +33,9 @@ public class HospitalApiController
 {
     @Autowired
     private HospitalService hospitalService;
+
+    @Autowired
+    private DepartmentService departmentService;
 
     @ApiOperation(value = "获取分页列表")
     @GetMapping("{page}/{limit}")
@@ -64,5 +70,29 @@ public class HospitalApiController
                     String hosname) {
         final List<Hospital> hospitalList = hospitalService.findByHosname(hosname);
         return Result.ok(hospitalList);
+    }
+
+    @ApiOperation(value = "查询医院编号所有科室列表")
+    @GetMapping("department/{hoscode}")
+    public Result getDeptList(
+            @ApiParam(name = "hoscode",
+                      value = "医院编号",
+                      required = true)
+            @PathVariable
+                    String hoscode) {
+        final List<DepartmentVo> deptTree = departmentService.findDeptTree(hoscode);
+        return Result.ok(deptTree);
+    }
+
+    @ApiOperation(value = "根据医院编号获取医院预约挂号详情")
+    @GetMapping("findHospDetail/{hoscode}")
+    public Result findHospDetail(
+            @ApiParam(name = "hoscode",
+                      value = "医院编号",
+                      required = true)
+            @PathVariable
+                    String hoscode) {
+        final Map<String, Object> map = hospitalService.item(hoscode);
+        return Result.ok(map);
     }
 }

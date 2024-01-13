@@ -72,4 +72,12 @@ public interface HospitalService
      * @return {@link List}<{@link Hospital}>
      */
     List<Hospital> findByHosname(String hosname);
+
+    /**
+     * 根据医院编号获取医院挂号预约详情
+     *
+     * @param hoscode 医院编号
+     * @return {@link Map}<{@link String}, {@link Object}>
+     */
+    Map<String, Object> item(String hoscode);
 }
