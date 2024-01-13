@@ -22,4 +22,12 @@ public interface UserInfoService extends IService<UserInfo>
      * @return {@link Map}<{@link String}, {@link Object}>
      */
     Map<String, Object> loginUser(LoginVo loginVo);
+
+    /**
+     * 通过 微信号 获取 用户信息
+     *
+     * @param openid 微信号
+     * @return {@link UserInfo}
+     */
+    UserInfo getByOpenid(String openid);
 }

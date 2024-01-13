@@ -47,21 +47,37 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
 
         // 验证码校验
-        final String mobileCode = redisTemplate
-                .opsForValue()
-                .get(phone + "");
+        final String mobileCode = redisTemplate.opsForValue()
+                                               .get(phone);
         if (!code.equals(mobileCode)) {
             throw new YyghException(ResultCodeEnum.CODE_ERROR);
         }
 
-        // 手机号是否被使用
-        UserInfo userInfo = baseMapper.selectOne(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getPhone, phone));
+        // 绑定手机号码
+        UserInfo userInfo = null;
+        final String openid = loginVo.getOpenid();
+        if (!StringUtils.isEmpty(openid)) {
+            userInfo = baseMapper.selectOne(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getOpenid, openid));
+            if (userInfo != null) {
+                userInfo.setPhone(phone);
+                baseMapper.updateById(userInfo);
+            }
+            else {
+                throw new YyghException(ResultCodeEnum.DATA_ERROR);
+            }
+        }
+
+        //如果userinfo为空，进行正常手机登录
         if (userInfo == null) {
-            userInfo = new UserInfo();
-            userInfo.setName("");
-            userInfo.setPhone(phone);
-            userInfo.setStatus(1);
-            baseMapper.insert(userInfo);
+            // 手机号是否被使用
+            userInfo = baseMapper.selectOne(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getPhone, phone));
+            if (userInfo == null) {
+                userInfo = new UserInfo();
+                userInfo.setName("");
+                userInfo.setPhone(phone);
+                userInfo.setStatus(1);
+                baseMapper.insert(userInfo);
+            }
         }
 
         // 校验账号状态
@@ -82,5 +98,16 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         final String token = JwtHelper.createToken(userInfo.getId(), name);
         result.put("token", token);
         return result;
+    }
+
+    /**
+     * 通过 微信号 获取 用户信息
+     *
+     * @param openid 微信号
+     * @return {@link UserInfo}
+     */
+    @Override
+    public UserInfo getByOpenid(String openid) {
+        return baseMapper.selectOne(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getOpenid, openid));
     }
 }

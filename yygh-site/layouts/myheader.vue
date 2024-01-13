@@ -137,6 +137,7 @@ import Vue from 'vue'
 import userInfoApi from '@/api/user/userInfo'
 import smsApi from '@/api/sms/sms'
 import hospitalApi from '@/api/hosp/hospital'
+import weixinApi from '@/api/user/weixin'
 
 const defaultDialogAtrr = {
   showLoginType: 'phone', // 控制手机登录与微信登录切换
@@ -185,9 +186,33 @@ export default {
       document.getElementById('loginDialog').click()
     })
     // 触发事件，显示登录层：loginEvent.$emit('loginDialogEvent')
+
+    // 初始化微信js
+    const script = document.createElement('script')
+    script.type = 'text/javascript'
+    script.src = 'https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js'
+    document.body.appendChild(script)
+
+    // 微信登录回调粗粒
+    const self = this
+    window['loginCallback'] = (name, token, openid) => {
+      debugger
+      self.loginCallback(name, token, openid)
+    }
   },
 
   methods: {
+    loginCallback(name, token, openid) {
+      // 打开手机登录层，绑定手机号，改逻辑与手机登录一致
+      if (openid !== '' && openid !== null) {
+        this.userInfo.openid = openid
+        this.dialogAttr.labelTips = '绑定手机号'
+        this.showLogin()
+      } else {
+        this.setCookies(name, token)
+      }
+    },
+
     // 获取验证码 / 登录
     btnClick() {
       // 判断是获取验证码还是登录
@@ -232,13 +257,13 @@ export default {
       this.dialogAttr.loginBtn = '正在提交...'
       userInfoApi.login(this.userInfo).then(response => {
         const data = response.data
-        this.setCookie(data.name, data.token)
+        this.setCookies(data.name, data.token)
       }).catch(() => {
         this.dialogAttr.loginBtn = '马上登录'
       })
     },
 
-    setCookie(name, token) {
+    setCookies(name, token) {
       cookie.set('name', name, { domain: 'localhost' })
       cookie.set('token', token, { domain: 'localhost' })
       window.location.reload()
@@ -341,6 +366,20 @@ export default {
     // 微信登录
     weixinLogin() {
       this.dialogAttr.showLoginType = 'weixin'
+
+      weixinApi.getLoginParam().then(response => {
+        // eslint-disable-next-line no-undef
+        new WxLogin({
+          self_redirect: true,
+          id: 'weixinLogin', // 需要显示的容器id
+          appid: response.data.appid, // 公众号appid wx*******
+          scope: response.data.scope, // 网页默认即可
+          redirect_uri: response.data.redirect_uri, // 授权成功后回调的url
+          state: response.data.state, // 可设置为简单的随机数加session用来校验
+          style: 'black', // 提供"black"、"white"可选。二维码的样式
+          href: '' // 外部css文件url，需要https
+        })
+      })
     },
 
     // 手机号登录
