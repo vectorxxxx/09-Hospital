@@ -9,10 +9,12 @@ import org.springframework.util.StringUtils;
 import xyz.funnyboy.yygh.common.exception.YyghException;
 import xyz.funnyboy.yygh.common.helper.JwtHelper;
 import xyz.funnyboy.yygh.common.result.ResultCodeEnum;
+import xyz.funnyboy.yygh.enums.AuthStatusEnum;
 import xyz.funnyboy.yygh.model.user.UserInfo;
 import xyz.funnyboy.yygh.user.mapper.UserInfoMapper;
 import xyz.funnyboy.yygh.user.service.UserInfoService;
 import xyz.funnyboy.yygh.vo.user.LoginVo;
+import xyz.funnyboy.yygh.vo.user.UserAuthVo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,8 +49,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
 
         // 验证码校验
-        final String mobileCode = redisTemplate.opsForValue()
-                                               .get(phone);
+        final String mobileCode = redisTemplate
+                .opsForValue()
+                .get(phone);
         if (!code.equals(mobileCode)) {
             throw new YyghException(ResultCodeEnum.CODE_ERROR);
         }
@@ -109,5 +112,22 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Override
     public UserInfo getByOpenid(String openid) {
         return baseMapper.selectOne(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getOpenid, openid));
+    }
+
+    /**
+     * 用户身份验证
+     *
+     * @param userId     用户 ID
+     * @param userAuthVo 用户身份验证 vo
+     */
+    @Override
+    public void userAuth(Long userId, UserAuthVo userAuthVo) {
+        final UserInfo userInfo = baseMapper.selectById(userId);
+        userInfo.setName(userAuthVo.getName());
+        userInfo.setCertificatesNo(userAuthVo.getCertificatesNo());
+        userInfo.setCertificatesType(userAuthVo.getCertificatesType());
+        userInfo.setCertificatesUrl(userAuthVo.getCertificatesUrl());
+        userInfo.setAuthStatus(AuthStatusEnum.AUTH_RUN.getStatus());
+        baseMapper.updateById(userInfo);
     }
 }

@@ -122,6 +122,7 @@ import '~/assets/css/hospital.css'
 
 import cookie from 'js-cookie'
 import hosApi from '@/api/hosp/hospital'
+import userInfoApi from '@/api/user/userInfo'
 export default {
   data() {
     return {
@@ -166,6 +167,15 @@ export default {
         loginEvent.$emit('loginDialogEvent')
         return
       }
+
+      // 认证判断
+      userInfoApi.getUserInfo().then(response => {
+        debugger
+        const authStatus = response.data.authStatus
+        if (!authStatus || authStatus !== 2) {
+          window.location.href = '/user'
+        }
+      })
       window.location.href = '/hospital/schedule?hoscode=' + this.hoscode + '&depcode=' + depcode
     }
   }

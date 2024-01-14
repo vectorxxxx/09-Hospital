@@ -4,14 +4,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import xyz.funnyboy.yygh.common.result.Result;
+import xyz.funnyboy.yygh.common.utils.AuthContextHolder;
 import xyz.funnyboy.yygh.common.utils.IpUtil;
+import xyz.funnyboy.yygh.model.user.UserInfo;
 import xyz.funnyboy.yygh.user.service.UserInfoService;
 import xyz.funnyboy.yygh.vo.user.LoginVo;
+import xyz.funnyboy.yygh.vo.user.UserAuthVo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -42,5 +42,28 @@ public class UserInfoApiController
         loginVo.setIp(IpUtil.getIpAddr(request));
         final Map<String, Object> info = userInfoService.loginUser(loginVo);
         return Result.ok(info);
+    }
+
+    @ApiOperation(value = "用户认证")
+    @PostMapping("auth/userAuth")
+    public Result userAuth(
+            @ApiParam(name = "userAuthVo",
+                      value = "用户认证对象",
+                      required = true)
+            @RequestBody
+                    UserAuthVo userAuthVo,
+
+            HttpServletRequest request) {
+        final Long userId = AuthContextHolder.getUserId(request);
+        userInfoService.userAuth(userId, userAuthVo);
+        return Result.ok();
+    }
+
+    @ApiOperation(value = "获取用户ID信息")
+    @GetMapping("auth/getUserInfo")
+    public Result getUserInfo(HttpServletRequest request) {
+        final Long userId = AuthContextHolder.getUserId(request);
+        final UserInfo userInfo = userInfoService.getById(userId);
+        return Result.ok(userInfo);
     }
 }

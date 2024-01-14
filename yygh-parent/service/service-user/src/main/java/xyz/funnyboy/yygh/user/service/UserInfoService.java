@@ -3,6 +3,7 @@ package xyz.funnyboy.yygh.user.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import xyz.funnyboy.yygh.model.user.UserInfo;
 import xyz.funnyboy.yygh.vo.user.LoginVo;
+import xyz.funnyboy.yygh.vo.user.UserAuthVo;
 
 import java.util.Map;
 
@@ -30,4 +31,12 @@ public interface UserInfoService extends IService<UserInfo>
      * @return {@link UserInfo}
      */
     UserInfo getByOpenid(String openid);
+
+    /**
+     * 用户身份验证
+     *
+     * @param userId     用户 ID
+     * @param userAuthVo 用户身份验证 vo
+     */
+    void userAuth(Long userId, UserAuthVo userAuthVo);
 }

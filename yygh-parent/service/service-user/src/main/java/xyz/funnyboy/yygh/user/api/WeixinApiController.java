@@ -123,9 +123,10 @@ public class WeixinApiController
             //如果查询到个人信息，那么直接进行登录
             //使用access_token换取受保护的资源：微信的个人信息
             StringBuilder baseUserInfoUrl = new StringBuilder();
-            baseUserInfoUrl.append("https://api.weixin.qq.com/sns/userinfo")
-                           .append("?access_token=%s")
-                           .append("&openid=%s");
+            baseUserInfoUrl
+                    .append("https://api.weixin.qq.com/sns/userinfo")
+                    .append("?access_token=%s")
+                    .append("&openid=%s");
             String userInfoUrl = String.format(baseUserInfoUrl.toString(), accessToken, openId);
             final String resultUserInfo;
             try {
@@ -150,7 +151,7 @@ public class WeixinApiController
             //获取扫描人信息添加数据库
             userInfo = new UserInfo();
             userInfo.setOpenid(openId);
-            userInfo.setNickName(nickname);
+            userInfo.setNickName(nickname.replaceAll("[\ue000-\uefff]", ""));
             userInfo.setStatus(1);
             userInfoService.save(userInfo);
         }
@@ -183,11 +184,12 @@ public class WeixinApiController
 
         //跳转到前端页面
         StringBuilder url = new StringBuilder();
-        url.append(ConstantWxPropertiesUtils.YYGH_BASE_URL)
-           .append("/weixin/callback")
-           .append("?token=%s")
-           .append("&openid=%s")
-           .append("&name=%s");
+        url
+                .append(ConstantWxPropertiesUtils.YYGH_BASE_URL)
+                .append("/weixin/callback")
+                .append("?token=%s")
+                .append("&openid=%s")
+                .append("&name=%s");
         String urlStr;
         try {
             urlStr = String.format(url.toString(), map.get("token"), map.get("openid"), URLEncoder.encode(map.get("name"), "utf-8"));
