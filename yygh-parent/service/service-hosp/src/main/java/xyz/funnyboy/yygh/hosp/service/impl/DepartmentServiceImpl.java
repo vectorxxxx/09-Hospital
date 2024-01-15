@@ -162,4 +162,16 @@ public class DepartmentServiceImpl implements DepartmentService
         }
         return "";
     }
+
+    /**
+     * 获取科室
+     *
+     * @param hoscode 医院编号
+     * @param depcode 科室编号
+     * @return {@link Department}
+     */
+    @Override
+    public Department getDepartment(String hoscode, String depcode) {
+        return departmentRepository.getDepartmentByHoscodeAndDepcode(hoscode, depcode);
+    }
 }

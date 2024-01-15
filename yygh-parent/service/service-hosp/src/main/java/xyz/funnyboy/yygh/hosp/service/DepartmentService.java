@@ -58,4 +58,13 @@ public interface DepartmentService
      * @return {@link String}
      */
     String getDepName(String hoscode, String depcode);
+
+    /**
+     * 获取科室
+     *
+     * @param hoscode 医院编号
+     * @param depcode 科室编号
+     * @return {@link Department}
+     */
+    Department getDepartment(String hoscode, String depcode);
 }
