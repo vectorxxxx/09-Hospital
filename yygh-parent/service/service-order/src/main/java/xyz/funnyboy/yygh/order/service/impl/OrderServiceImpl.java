@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import xyz.funnyboy.yygh.model.order.OrderInfo;
 import xyz.funnyboy.yygh.model.user.Patient;
 import xyz.funnyboy.yygh.order.mapper.OrderInfoMapper;
 import xyz.funnyboy.yygh.order.service.OrderService;
+import xyz.funnyboy.yygh.order.service.WeixinService;
 import xyz.funnyboy.yygh.user.client.PatientFeignClient;
 import xyz.funnyboy.yygh.vo.hosp.ScheduleOrderVo;
 import xyz.funnyboy.yygh.vo.order.OrderMqVo;
@@ -38,6 +40,7 @@ import java.util.Random;
  * @date 2024-01-15 23:28:20
  */
 @Service
+@Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> implements OrderService
 {
     @Autowired
@@ -48,6 +51,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
 
     @Autowired
     private RabbitService rabbitService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private WeixinService weixinService;
 
     /**
      * 保存订单
@@ -187,7 +196,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
         // orderQueryVo获取条件值
         final String name = orderQueryVo.getKeyword();
         final String outTradeNo = orderQueryVo.getOutTradeNo();
-        final String patientName = orderQueryVo.getPatientName();
+        final Long patientId = orderQueryVo.getPatientId();
         final String orderStatus = orderQueryVo.getOrderStatus();
         final String reserveDate = orderQueryVo.getReserveDate();
         final String createTimeBegin = orderQueryVo.getCreateTimeBegin();
@@ -197,11 +206,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
         final LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<OrderInfo>()
                 .like(!StringUtils.isEmpty(name), OrderInfo::getHosname, name)
                 .eq(!StringUtils.isEmpty(outTradeNo), OrderInfo::getOutTradeNo, outTradeNo)
-                .like(!StringUtils.isEmpty(patientName), OrderInfo::getPatientName, patientName)
+                .eq(!StringUtils.isEmpty(patientId), OrderInfo::getPatientId, patientId)
                 .eq(!StringUtils.isEmpty(orderStatus), OrderInfo::getOrderStatus, orderStatus)
                 .ge(!StringUtils.isEmpty(reserveDate), OrderInfo::getReserveDate, reserveDate)
                 .ge(!StringUtils.isEmpty(createTimeBegin), OrderInfo::getCreateTime, createTimeBegin)
-                .le(!StringUtils.isEmpty(createTimeEnd), OrderInfo::getCreateTime, createTimeEnd);
+                .le(!StringUtils.isEmpty(createTimeEnd), OrderInfo::getCreateTime, createTimeEnd)
+                .orderByDesc(OrderInfo::getReserveDate)
+                .orderByDesc(OrderInfo::getReserveTime)
+                .orderByDesc(OrderInfo::getUpdateTime)
+                .orderByDesc(OrderInfo::getCreateTime);
 
         // 编号变成对应值封装
         final Page<OrderInfo> pages = baseMapper.selectPage(pageParam, queryWrapper);
@@ -235,6 +248,78 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
         map.put("orderInfo", orderInfo);
         map.put("patient", patientFeignClient.getPatient(orderInfo.getPatientId()));
         return map;
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param orderId 订单编号
+     * @return {@link Boolean}
+     */
+    @Override
+    public Boolean cancelOrder(Long orderId) {
+        // 获取订单信息
+        final OrderInfo orderInfo = orderService.getById(orderId);
+
+        // 判断是否取消
+        if (new DateTime(orderInfo.getQuitTime()).isBeforeNow()) {
+            throw new YyghException(ResultCodeEnum.CANCEL_ORDER_NO);
+        }
+
+        // 调用医院接口实现预约取消
+        final SignInfoVo signInfo = hospitalFeignClient.getSignInfo(orderInfo.getHoscode());
+        if (signInfo == null) {
+            throw new YyghException(ResultCodeEnum.PARAM_ERROR);
+        }
+        Map<String, Object> reqMap = new HashMap<>();
+        reqMap.put("hoscode", orderInfo.getHoscode());
+        reqMap.put("hosRecordId", orderInfo.getHosRecordId());
+        reqMap.put("timestamp", HttpRequestHelper.getTimestamp());
+        reqMap.put("sign", HttpRequestHelper.getSign(reqMap, signInfo.getSignKey()));
+        JSONObject result = HttpRequestHelper.sendRequest(reqMap, signInfo.getApiUrl() + "/order/updateCancelStatus");
+        log.info("result: " + result.toJSONString());
+
+        // 根据医院接口返回数据
+        if (result.getInteger("code") != 200) {
+            throw new YyghException(result.getString("message"), ResultCodeEnum.FAIL.getCode());
+        }
+
+        // 判断当前订单是否可以取消
+        if (orderInfo
+                .getOrderStatus()
+                .intValue() == OrderStatusEnum.PAID
+                .getStatus()
+                .intValue()) {
+            // 更新订单状态
+            final Boolean refund = weixinService.refund(orderId);
+            if (!refund) {
+                throw new YyghException(ResultCodeEnum.CANCEL_ORDER_FAIL);
+            }
+
+            // 发送mq更新预约数量
+            OrderMqVo orderMqVo = new OrderMqVo();
+            orderMqVo.setScheduleId(orderInfo.getScheduleId());
+
+            // 短信提示
+            SmsVo smsVo = new SmsVo();
+            smsVo.setPhone(orderInfo.getPatientPhone());
+            final HashMap<String, Object> param = new HashMap<String, Object>()
+            {
+                private static final long serialVersionUID = 6027451149102592897L;
+
+                {
+                    put("title", orderInfo.getHosname() + "|" + orderInfo.getDepname() + orderInfo.getTitle());
+                    put("reserveDate", new DateTime(orderInfo.getReserveDate()).toString("yyyy-MM-dd") + (orderInfo.getReserveTime() == 0 ?
+                                                                                                          "上午" :
+                                                                                                          "下午"));
+                    put("name", orderInfo.getPatientName());
+                }
+            };
+            smsVo.setParam(param);
+            orderMqVo.setSmsVo(smsVo);
+            rabbitService.sendMessage(MQConst.EXCHANGE_DIRECT_ORDER, MQConst.ROUTING_ORDER, orderMqVo);
+        }
+        return null;
     }
 
     /**

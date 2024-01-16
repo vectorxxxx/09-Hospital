@@ -31,5 +31,12 @@ export default {
       url: `${api_name}/auth/getOrder/${orderId}`,
       method: 'get'
     })
+  },
+  // 取消订单
+  cancelOrder(orderId) {
+    return request({
+      url: `${api_name}/auth/cancelOrder/${orderId}`,
+      method: 'post'
+    })
   }
 }

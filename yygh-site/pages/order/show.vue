@@ -134,6 +134,7 @@ import '~/assets/css/hospital_personal.css'
 import '~/assets/css/hospital.css'
 
 import orderInfoApi from '@/api/order/orderInfo'
+import weixinApi from '@/api/order/weixin'
 
 export default {
 
@@ -162,6 +163,51 @@ export default {
     init() {
       orderInfoApi.getOrderInfo(this.orderId).then(response => {
         this.orderInfo = response.data
+      })
+    },
+
+    // 支付
+    pay() {
+      this.dialogPayVisible = true
+      weixinApi.createNative(this.orderId).then(response => {
+        this.payObj = response.data
+        if (!this.payObj.codeUrl) {
+          this.dialogPayVisible = false
+          this.$message.error('支付失败，请稍后再试')
+        } else {
+          this.timer = setInterval(() => {
+            this.queryPayStatus(this.orderId)
+          }, 3000)
+        }
+      })
+    },
+
+    // 查询支付状态
+    queryPayStatus(orderId) {
+      weixinApi.queryPayStatus(orderId).then(response => {
+        if (response.message === '支付中') {
+          return
+        }
+        clearInterval(this.timer)
+        window.location.reload()
+      })
+    },
+
+    closeDialog() {
+      this.timer && clearInterval(this.timer)
+    },
+
+    // 取消预约
+    cancelOrder() {
+      this.$confirm('确定要取消预约吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return orderInfoApi.cancelOrder(this.orderId)
+      }).then(() => {
+        this.$message.success('取消成功')
+        this.init()
       })
     }
   }

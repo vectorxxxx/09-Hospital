@@ -91,4 +91,15 @@ public class OrderApiController
     public Result getOrderStatus() {
         return Result.ok(OrderStatusEnum.getStatusList());
     }
+
+    @ApiOperation(value = "取消预约")
+    @PostMapping("auth/cancelOrder/{orderId}")
+    public Result cancelOrder(
+            @ApiParam(name = "orderId",
+                      value = "订单ID",
+                      required = true)
+            @PathVariable("orderId")
+                    Long orderId) {
+        return Result.ok(orderService.cancelOrder(orderId));
+    }
 }
