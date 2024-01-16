@@ -183,3 +183,10 @@ netstat -tunpl | grep 27017
  Canonical Host Name: www.baidu.com
  Local Host Address: 127.0.0.1
  ```
+
+
+
+## 5、Contact VS Contract
+
+- Contact：v. 接触；联系 n. 接触；联系
+- Contract：v. 订合同；感染 n. 合同；契约

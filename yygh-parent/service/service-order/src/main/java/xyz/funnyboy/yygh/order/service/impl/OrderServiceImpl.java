@@ -1,11 +1,15 @@
 package xyz.funnyboy.yygh.order.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import xyz.funnyboy.common.rabbit.constant.MQConst;
 import xyz.funnyboy.common.rabbit.service.RabbitService;
 import xyz.funnyboy.yygh.common.exception.YyghException;
@@ -20,6 +24,7 @@ import xyz.funnyboy.yygh.order.service.OrderService;
 import xyz.funnyboy.yygh.user.client.PatientFeignClient;
 import xyz.funnyboy.yygh.vo.hosp.ScheduleOrderVo;
 import xyz.funnyboy.yygh.vo.order.OrderMqVo;
+import xyz.funnyboy.yygh.vo.order.OrderQueryVo;
 import xyz.funnyboy.yygh.vo.order.SignInfoVo;
 import xyz.funnyboy.yygh.vo.sms.SmsVo;
 
@@ -168,5 +173,80 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
             throw new YyghException(result.getString("message"), ResultCodeEnum.FAIL.getCode());
         }
         return orderInfo.getId();
+    }
+
+    /**
+     * 选择页面
+     *
+     * @param pageParam    页面参数
+     * @param orderQueryVo 订单查询 VO
+     * @return {@link IPage}<{@link OrderInfo}>
+     */
+    @Override
+    public IPage<OrderInfo> selectPage(Page<OrderInfo> pageParam, OrderQueryVo orderQueryVo) {
+        // orderQueryVo获取条件值
+        final String name = orderQueryVo.getKeyword();
+        final String outTradeNo = orderQueryVo.getOutTradeNo();
+        final String patientName = orderQueryVo.getPatientName();
+        final String orderStatus = orderQueryVo.getOrderStatus();
+        final String reserveDate = orderQueryVo.getReserveDate();
+        final String createTimeBegin = orderQueryVo.getCreateTimeBegin();
+        final String createTimeEnd = orderQueryVo.getCreateTimeEnd();
+
+        // 对条件值进行非空判断
+        final LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<OrderInfo>()
+                .like(!StringUtils.isEmpty(name), OrderInfo::getHosname, name)
+                .eq(!StringUtils.isEmpty(outTradeNo), OrderInfo::getOutTradeNo, outTradeNo)
+                .like(!StringUtils.isEmpty(patientName), OrderInfo::getPatientName, patientName)
+                .eq(!StringUtils.isEmpty(orderStatus), OrderInfo::getOrderStatus, orderStatus)
+                .ge(!StringUtils.isEmpty(reserveDate), OrderInfo::getReserveDate, reserveDate)
+                .ge(!StringUtils.isEmpty(createTimeBegin), OrderInfo::getCreateTime, createTimeBegin)
+                .le(!StringUtils.isEmpty(createTimeEnd), OrderInfo::getCreateTime, createTimeEnd);
+
+        // 编号变成对应值封装
+        final Page<OrderInfo> pages = baseMapper.selectPage(pageParam, queryWrapper);
+        pages
+                .getRecords()
+                .forEach(this::packOrderInfo);
+        return pages;
+    }
+
+    /**
+     * 根据订单ID获取订单信息
+     *
+     * @param orderId 订单ID
+     * @return {@link OrderInfo}
+     */
+    @Override
+    public OrderInfo getOrderInfo(String orderId) {
+        return this.packOrderInfo(baseMapper.selectById(orderId));
+    }
+
+    /**
+     * 订单详情
+     *
+     * @param orderId 订单编号
+     * @return {@link Map}<{@link String}, {@link Object}>
+     */
+    @Override
+    public Map<String, Object> show(Long orderId) {
+        Map<String, Object> map = new HashMap<>();
+        final OrderInfo orderInfo = this.packOrderInfo(baseMapper.selectById(orderId));
+        map.put("orderInfo", orderInfo);
+        map.put("patient", patientFeignClient.getPatient(orderInfo.getPatientId()));
+        return map;
+    }
+
+    /**
+     * 包装订单信息
+     *
+     * @param orderInfo 订单信息
+     * @return {@link OrderInfo}
+     */
+    private OrderInfo packOrderInfo(OrderInfo orderInfo) {
+        orderInfo
+                .getParam()
+                .put("orderStatusString", OrderStatusEnum.getStatusNameByStatus(orderInfo.getOrderStatus()));
+        return orderInfo;
     }
 }

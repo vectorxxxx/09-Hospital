@@ -54,7 +54,7 @@ public class PatientServiceImpl extends ServiceImpl<PatientMapper, Patient> impl
      */
     private Patient packPatient(Patient patient) {
         final String certificatesTypeString = dictFeignClient.getName(DictEnum.CERTIFICATES_TYPE.getDictCode(), patient.getCertificatesType());
-        final String contractsCertificatesTypeString = dictFeignClient.getName(DictEnum.CERTIFICATES_TYPE.getDictCode(), patient.getContactsCertificatesType());
+        final String contactsCertificatesTypeString = dictFeignClient.getName(DictEnum.CERTIFICATES_TYPE.getDictCode(), patient.getContactsCertificatesType());
 
         final String provinceString = dictFeignClient.getName(patient.getProvinceCode());
         final String cityString = dictFeignClient.getName(patient.getCityCode());
@@ -65,7 +65,7 @@ public class PatientServiceImpl extends ServiceImpl<PatientMapper, Patient> impl
                 .put("certificatesTypeString", certificatesTypeString);
         patient
                 .getParam()
-                .put("contractsCertificatesTypeString", contractsCertificatesTypeString);
+                .put("contactsCertificatesTypeString", contactsCertificatesTypeString);
         patient
                 .getParam()
                 .put("provinceString", provinceString);

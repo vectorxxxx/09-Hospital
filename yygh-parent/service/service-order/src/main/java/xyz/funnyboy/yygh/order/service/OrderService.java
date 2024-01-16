@@ -1,7 +1,12 @@
 package xyz.funnyboy.yygh.order.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import xyz.funnyboy.yygh.model.order.OrderInfo;
+import xyz.funnyboy.yygh.vo.order.OrderQueryVo;
+
+import java.util.Map;
 
 /**
  * @author VectorX
@@ -18,4 +23,29 @@ public interface OrderService extends IService<OrderInfo>
      * @return {@link Long}
      */
     Long saveOrder(String scheduleId, Long patientId);
+
+    /**
+     * 选择页面
+     *
+     * @param pageParam    页面参数
+     * @param orderQueryVo 订单查询 VO
+     * @return {@link IPage}<{@link OrderInfo}>
+     */
+    IPage<OrderInfo> selectPage(Page<OrderInfo> pageParam, OrderQueryVo orderQueryVo);
+
+    /**
+     * 根据订单ID获取订单信息
+     *
+     * @param orderId 订单ID
+     * @return {@link OrderInfo}
+     */
+    OrderInfo getOrderInfo(String orderId);
+
+    /**
+     * 订单详情
+     *
+     * @param orderId 订单编号
+     * @return {@link Map}<{@link String}, {@link Object}>
+     */
+    Map<String, Object> show(Long orderId);
 }

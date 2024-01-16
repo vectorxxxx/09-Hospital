@@ -94,6 +94,6 @@ public class PatientApiController
                       required = true)
             @PathVariable("id")
                     Long id) {
-        return patientService.getById(id);
+        return patientService.getPatientId(id);
     }
 }
