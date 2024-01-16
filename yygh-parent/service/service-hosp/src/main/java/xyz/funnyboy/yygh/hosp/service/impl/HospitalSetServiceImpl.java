@@ -9,6 +9,7 @@ import xyz.funnyboy.yygh.common.result.ResultCodeEnum;
 import xyz.funnyboy.yygh.hosp.mapper.HospitalSetMapper;
 import xyz.funnyboy.yygh.hosp.service.HospitalSetService;
 import xyz.funnyboy.yygh.model.hosp.HospitalSet;
+import xyz.funnyboy.yygh.vo.order.SignInfoVo;
 
 /**
  * HospitalSetServiceImpl
@@ -39,5 +40,24 @@ public class HospitalSetServiceImpl extends ServiceImpl<HospitalSetMapper, Hospi
             throw new YyghException(ResultCodeEnum.HOSPITAL_LOCK);
         }
         return hospitalSet.getSignKey();
+    }
+
+    /**
+     * 获取医院签名信息
+     *
+     * @param hoscode 医院编号
+     * @return {@link SignInfoVo}
+     */
+    @Override
+    public SignInfoVo getSignInfo(String hoscode) {
+        final HospitalSet hospitalSet = baseMapper.selectOne(new LambdaQueryWrapper<HospitalSet>().eq(HospitalSet::getHoscode, hoscode));
+        if (hospitalSet == null) {
+            throw new YyghException(ResultCodeEnum.HOSPITAL_OPEN);
+        }
+
+        SignInfoVo signInfoVo = new SignInfoVo();
+        signInfoVo.setApiUrl(hospitalSet.getApiUrl());
+        signInfoVo.setSignKey(hospitalSet.getSignKey());
+        return signInfoVo;
     }
 }

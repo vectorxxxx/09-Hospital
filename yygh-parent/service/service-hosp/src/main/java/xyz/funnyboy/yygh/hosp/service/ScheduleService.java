@@ -2,6 +2,7 @@ package xyz.funnyboy.yygh.hosp.service;
 
 import org.springframework.data.domain.Page;
 import xyz.funnyboy.yygh.model.hosp.Schedule;
+import xyz.funnyboy.yygh.vo.hosp.ScheduleOrderVo;
 import xyz.funnyboy.yygh.vo.hosp.ScheduleQueryVo;
 
 import java.util.List;
@@ -80,4 +81,19 @@ public interface ScheduleService
      * @return {@link Schedule}
      */
     Schedule getById(String id);
+
+    /**
+     * 获取预约订单 VO
+     *
+     * @param scheduleId 预约 ID
+     * @return {@link ScheduleOrderVo}
+     */
+    ScheduleOrderVo getScheduleOrderVo(String scheduleId);
+
+    /**
+     * 修改排班
+     *
+     * @param schedule 排班
+     */
+    void update(Schedule schedule);
 }

@@ -15,6 +15,12 @@
     <dependencies>
         <dependency>
             <groupId>xyz.funnyboy</groupId>
+            <artifactId>rabbit-util</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>xyz.funnyboy</groupId>
             <artifactId>service-cmn-client</artifactId>
             <version>1.0</version>
         </dependency>

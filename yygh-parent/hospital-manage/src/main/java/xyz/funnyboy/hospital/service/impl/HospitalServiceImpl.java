@@ -25,7 +25,7 @@ public class HospitalServiceImpl implements HospitalService
 {
 
     @Autowired
-    private ScheduleMapper hospitalMapper;
+    private ScheduleMapper scheduleMapper;
 
     @Autowired
     private OrderInfoMapper orderInfoMapper;
@@ -69,7 +69,7 @@ public class HospitalServiceImpl implements HospitalService
                 .intValue() - 1;
         if (availableNumber > 0) {
             schedule.setAvailableNumber(availableNumber);
-            hospitalMapper.updateById(schedule);
+            scheduleMapper.updateById(schedule);
 
             //记录预约记录
             OrderInfo orderInfo = new OrderInfo();
@@ -143,7 +143,7 @@ public class HospitalServiceImpl implements HospitalService
     }
 
     private Schedule getSchedule(String frontSchId) {
-        return hospitalMapper.selectById(frontSchId);
+        return scheduleMapper.selectById(frontSchId);
     }
 
     /**

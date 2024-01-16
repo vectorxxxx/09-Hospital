@@ -1,4 +1,4 @@
-package xyz.funnyboy.yygh.vo.msm;
+package xyz.funnyboy.yygh.vo.sms;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Data
 @ApiModel(description = "短信实体")
-public class MsmVo
+public class SmsVo
 {
 
     @ApiModelProperty(value = "phone")

@@ -10,8 +10,11 @@ import com.aliyun.teautil.models.RuntimeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import xyz.funnyboy.yygh.sms.service.SmsService;
 import xyz.funnyboy.yygh.sms.utils.ConstantPropertiesUtils;
+import xyz.funnyboy.yygh.sms.utils.RandomUtil;
+import xyz.funnyboy.yygh.vo.sms.SmsVo;
 
 import java.util.HashMap;
 
@@ -76,11 +79,32 @@ public class SmsServiceImpl implements SmsService
                 return false;
             }
 
+            LOGGER.info("发送短信成功，手机号码：{}，验证码：{}", phone, code);
             return true;
         }
         catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return false;
         }
+    }
+
+    /**
+     * 使用MQ发送短信
+     *
+     * @param smsVo 短信VO
+     * @return boolean
+     */
+    @Override
+    public boolean send(SmsVo smsVo) {
+        if (!StringUtils.isEmpty(smsVo) && !smsVo
+                .getParam()
+                .isEmpty()) {
+            // 这边直接发送短信验证码，不然还要申请短信模板，比较麻烦
+            smsVo
+                    .getParam()
+                    .forEach((key, value) -> System.out.println(key + "=" + value));
+            return this.send(smsVo.getPhone(), RandomUtil.getFourBitRandom());
+        }
+        return false;
     }
 }

@@ -1,5 +1,7 @@
 package xyz.funnyboy.yygh.sms.service;
 
+import xyz.funnyboy.yygh.vo.sms.SmsVo;
+
 /**
  * @author VectorX
  * @version V1.0
@@ -15,4 +17,12 @@ public interface SmsService
      * @return boolean
      */
     boolean send(String phone, String code);
+
+    /**
+     * 使用MQ发送短信
+     *
+     * @param smsVo 短信VO
+     * @return boolean
+     */
+    boolean send(SmsVo smsVo);
 }

@@ -13,6 +13,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>xyz.funnyboy</groupId>
+            <artifactId>rabbit-util</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>dysmsapi20170525</artifactId>
         </dependency>
