@@ -161,6 +161,23 @@ export const constantRouterMap = [
     ]
   },
 
+  {
+    path: '/statistics',
+    component: Layout,
+    redirect: '/statistics/order/index',
+    name: 'Statistics',
+    meta: { title: '统计管理', icon: 'table' },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'order/index',
+        name: '预约统计',
+        component: () => import('@/views/statistics/order/index'),
+        meta: { title: '预约统计' }
+      }
+    ]
+  },
+
   { path: '*', redirect: '/404', hidden: true }
 ]
 

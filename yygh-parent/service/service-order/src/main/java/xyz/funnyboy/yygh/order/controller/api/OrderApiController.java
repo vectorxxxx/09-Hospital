@@ -11,9 +11,11 @@ import xyz.funnyboy.yygh.common.utils.AuthContextHolder;
 import xyz.funnyboy.yygh.enums.OrderStatusEnum;
 import xyz.funnyboy.yygh.model.order.OrderInfo;
 import xyz.funnyboy.yygh.order.service.OrderService;
+import xyz.funnyboy.yygh.vo.order.OrderCountQueryVo;
 import xyz.funnyboy.yygh.vo.order.OrderQueryVo;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * 订单接口
@@ -101,5 +103,16 @@ public class OrderApiController
             @PathVariable("orderId")
                     Long orderId) {
         return Result.ok(orderService.cancelOrder(orderId));
+    }
+
+    @ApiOperation(value = "获取订单统计数据")
+    @PostMapping("inner/getCountMap")
+    public Map<String, Object> getCountMap(
+            @ApiParam(name = "orderCountQueryVo",
+                      value = "查询条件",
+                      required = false)
+            @RequestBody
+                    OrderCountQueryVo orderCountQueryVo) {
+        return orderService.getCountMap(orderCountQueryVo);
     }
 }

@@ -25,14 +25,14 @@ import xyz.funnyboy.yygh.order.service.OrderService;
 import xyz.funnyboy.yygh.order.service.WeixinService;
 import xyz.funnyboy.yygh.user.client.PatientFeignClient;
 import xyz.funnyboy.yygh.vo.hosp.ScheduleOrderVo;
-import xyz.funnyboy.yygh.vo.order.OrderMqVo;
-import xyz.funnyboy.yygh.vo.order.OrderQueryVo;
-import xyz.funnyboy.yygh.vo.order.SignInfoVo;
+import xyz.funnyboy.yygh.vo.order.*;
 import xyz.funnyboy.yygh.vo.sms.SmsVo;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * @author VectorX
@@ -320,6 +320,67 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
             rabbitService.sendMessage(MQConst.EXCHANGE_DIRECT_ORDER, MQConst.ROUTING_ORDER, orderMqVo);
         }
         return null;
+    }
+
+    /**
+     * 就诊提醒
+     */
+    @Override
+    public void patientTips() {
+        // 查询当天未取消的订单
+        final List<OrderInfo> orderInfoList = baseMapper.selectList(new LambdaQueryWrapper<OrderInfo>()
+                .eq(OrderInfo::getReserveDate, new DateTime().toString("yyyy-MM-dd"))
+                .ne(OrderInfo::getOrderStatus, OrderStatusEnum.CANCLE.getStatus()));
+
+        // 遍历发短信
+        orderInfoList.forEach(orderInfo -> {
+            SmsVo smsVo = new SmsVo();
+            smsVo.setPhone(orderInfo.getPatientPhone());
+            HashMap<String, Object> param = new HashMap<String, Object>()
+            {
+                private static final long serialVersionUID = 6027451149102592897L;
+
+                {
+                    put("title", orderInfo.getHosname() + "|" + orderInfo.getDepname() + orderInfo.getTitle());
+                    put("reserveDate", new DateTime(orderInfo.getReserveDate()).toString("yyyy-MM-dd") + (orderInfo.getReserveTime() == 0 ?
+                                                                                                          "上午" :
+                                                                                                          "下午"));
+                    put("name", orderInfo.getPatientName());
+                }
+            };
+            smsVo.setParam(param);
+            rabbitService.sendMessage(MQConst.EXCHANGE_DIRECT_SMS, MQConst.ROUTING_SMS_ITEM, smsVo);
+        });
+    }
+
+    /**
+     * 订单统计
+     *
+     * @param orderCountQueryVo 订单统计查询 VO
+     * @return {@link Map}<{@link String}, {@link Object}>
+     */
+    @Override
+    public Map<String, Object> getCountMap(OrderCountQueryVo orderCountQueryVo) {
+        // 调用mapper方法得到数据
+        final List<OrderCountVo> orderCountVoList = baseMapper.selectOrderCount(orderCountQueryVo);
+
+        // 获取x需要数据，日期数据  list集合
+        final List<String> dateList = orderCountVoList
+                .stream()
+                .map(OrderCountVo::getReserveDate)
+                .collect(Collectors.toList());
+
+        // 获取y需要数据，具体数量  list集合
+        final List<Integer> countList = orderCountVoList
+                .stream()
+                .map(OrderCountVo::getCount)
+                .collect(Collectors.toList());
+
+        // 封装数据
+        Map<String, Object> countMap = new HashMap<>();
+        countMap.put("dateList", dateList);
+        countMap.put("countList", countList);
+        return countMap;
     }
 
     /**
