@@ -79,7 +79,7 @@
           </div>
         </div>
 
-        <div v-if="userInfo.authStatus != 0" class="context-container">
+        <div v-if="userInfo.authStatus !== 0" class="context-container">
           <div>
             <el-form label-width="110px" label-position="right">
               <el-form-item prop="name" label="姓名：" class="form-normal">

@@ -1,0 +1,51 @@
+{
+    "indexes": [
+        {
+            "v": {
+                "$numberInt": "2"
+            },
+            "key": {
+                "_id": {
+                    "$numberInt": "1"
+                }
+            },
+            "name": "_id_"
+        },
+        {
+            "v": {
+                "$numberInt": "2"
+            },
+            "key": {
+                "hoscode": {
+                    "$numberInt": "1"
+                }
+            },
+            "name": "hoscode"
+        },
+        {
+            "v": {
+                "$numberInt": "2"
+            },
+            "key": {
+                "depcode": {
+                    "$numberInt": "1"
+                }
+            },
+            "name": "depcode"
+        },
+        {
+            "v": {
+                "$numberInt": "2"
+            },
+            "key": {
+                "hosScheduleId": {
+                    "$numberInt": "1"
+                }
+            },
+            "name": "hosScheduleId"
+        }
+    ],
+    "uuid": "ab618eb8c55b4354aeec81379765d2f8",
+    "collectionName": "Schedule",
+    "type": "collection"
+}

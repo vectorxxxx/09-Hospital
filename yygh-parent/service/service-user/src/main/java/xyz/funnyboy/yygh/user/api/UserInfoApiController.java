@@ -5,9 +5,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import xyz.funnyboy.yygh.cmn.client.DictFeignClient;
 import xyz.funnyboy.yygh.common.result.Result;
 import xyz.funnyboy.yygh.common.utils.AuthContextHolder;
 import xyz.funnyboy.yygh.common.utils.IpUtil;
+import xyz.funnyboy.yygh.enums.DictEnum;
 import xyz.funnyboy.yygh.model.user.UserInfo;
 import xyz.funnyboy.yygh.user.service.UserInfoService;
 import xyz.funnyboy.yygh.vo.user.LoginVo;
@@ -30,6 +32,9 @@ public class UserInfoApiController
 {
     @Autowired
     private UserInfoService userInfoService;
+
+    @Autowired
+    private DictFeignClient dictFeignClient;
 
     @ApiOperation(value = "会员登录")
     @PostMapping("/login")
@@ -64,6 +69,9 @@ public class UserInfoApiController
     public Result getUserInfo(HttpServletRequest request) {
         final Long userId = AuthContextHolder.getUserId(request);
         final UserInfo userInfo = userInfoService.getById(userId);
+        userInfo
+                .getParam()
+                .put("certificatesTypeString", dictFeignClient.getName(DictEnum.CERTIFICATES_TYPE.getDictCode(), userInfo.getCertificatesType()));
         return Result.ok(userInfo);
     }
 }

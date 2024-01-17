@@ -1,0 +1,41 @@
+{
+    "indexes": [
+        {
+            "v": {
+                "$numberInt": "2"
+            },
+            "key": {
+                "_id": {
+                    "$numberInt": "1"
+                }
+            },
+            "name": "_id_"
+        },
+        {
+            "v": {
+                "$numberInt": "2"
+            },
+            "key": {
+                "hoscode": {
+                    "$numberInt": "1"
+                }
+            },
+            "name": "hoscode"
+        },
+        {
+            "v": {
+                "$numberInt": "2"
+            },
+            "key": {
+                "depcode": {
+                    "$numberInt": "1"
+                }
+            },
+            "name": "depcode",
+            "unique": true
+        }
+    ],
+    "uuid": "365420caa0314f118560b2a0c60bcf98",
+    "collectionName": "Department",
+    "type": "collection"
+}
